@@ -1,0 +1,188 @@
+/* Styles for the multi-view app: shell, people, share, milestones, weeks, facts, compare, events.
+   Tokens and base components live in styles.css. */
+
+/* ---------- Shell: header, tabs, theme, banner ---------- */
+.header-actions { display: flex; align-items: center; gap: 0.6rem; }
+.tabbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem 1.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+.tabs { display: flex; gap: 0.25rem; }
+.tab { position: relative; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.7rem 0.9rem; background: none; border: 0; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; border-radius: var(--r-control) var(--r-control) 0 0; transition: color 0.2s var(--ease); }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); }
+.tab:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.tab-line { position: absolute; left: 0.5rem; right: 0.5rem; bottom: -1px; height: 2px; background: var(--accent); border-radius: 2px; }
+.clock { margin: 0 0 0.7rem; color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+
+.theme-toggle { display: inline-flex; padding: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-control); }
+.theme-toggle button { position: relative; width: 2rem; height: 2rem; display: grid; place-items: center; background: none; border: 0; color: var(--muted); border-radius: 8px; cursor: pointer; }
+.theme-toggle button:hover { color: var(--ink); }
+.theme-toggle button[aria-checked="true"] { color: var(--on-accent); }
+.theme-toggle button:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.theme-pill { position: absolute; inset: 0; background: var(--accent); border-radius: 8px; }
+.theme-ic { position: relative; }
+
+.banner { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; overflow: hidden; background: var(--accent-soft); border: 1px solid var(--line); border-radius: var(--r-surface); padding: 0.75rem 1rem; margin-bottom: 1.25rem; }
+.banner p { margin: 0; flex: 1; min-width: 12rem; }
+
+/* ---------- Shared bits ---------- */
+.muted { color: var(--muted); }
+.small { font-size: 0.9rem; }
+p.muted { margin: 0.25rem 0 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.h-icon { display: flex; align-items: center; gap: 0.5rem; }
+.h-icon svg { color: var(--accent); }
+.with-icon { display: inline-flex; align-items: center; gap: 0.45rem; }
+.field { gap: 1.1rem; }
+.field-row { display: grid; gap: 0.5rem; }
+select.text-input, .cmp-pickers select, .text-input {
+  font: inherit; font-family: var(--mono); font-size: 0.95rem; width: 100%; padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line); border-radius: var(--r-control); background: var(--surface-2); color: var(--ink);
+}
+.text-input:hover, .cmp-pickers select:hover { border-color: var(--muted); }
+.text-input:focus-visible, .cmp-pickers select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.field-foot { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 0.85rem; }
+.tz summary { cursor: pointer; display: flex; align-items: center; gap: 0.45rem; color: var(--muted); font-size: 0.92rem; width: fit-content; border-radius: 6px; }
+.tz summary:hover { color: var(--ink); }
+.tz summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.tz[open] summary { margin-bottom: 0.75rem; }
+.tz label { display: block; margin-bottom: 0.4rem; }
+
+.picker-trigger { gap: 0.6rem; justify-content: flex-start; }
+.trigger-icon { flex: none; color: var(--muted); }
+.trigger-text { flex: 1; min-width: 0; }
+.trigger-chev { flex: none; color: var(--muted); transition: transform 0.25s var(--ease); }
+.picker-trigger[aria-expanded="true"] .trigger-chev { transform: rotate(180deg); }
+.nav-btn { display: grid; place-items: center; }
+
+.btn-chip { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.8rem; font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-control); cursor: pointer; transition: border-color 0.2s var(--ease); }
+.btn-chip:hover { border-color: var(--muted); }
+.btn-chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.chip-icon { display: inline-grid; place-items: center; width: 16px; height: 16px; }
+.chip-icon > span { display: grid; }
+.btn-danger { font: inherit; font-weight: 600; padding: 0.55rem 1rem; background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: var(--r-control); cursor: pointer; }
+.btn-danger:active { transform: translateY(1px); }
+.btn-danger:focus-visible { outline: 3px solid var(--danger); outline-offset: 2px; }
+.icon-btn { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; background: transparent; border: 1px solid transparent; color: var(--muted); border-radius: var(--r-control); cursor: pointer; flex: none; }
+.icon-btn:hover { color: var(--ink); border-color: var(--line); }
+.icon-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn-ghost.with-icon { display: inline-flex; }
+
+.empty-state { display: grid; justify-items: start; gap: 0.5rem; padding: 2rem; margin-top: 1.5rem; border: 1px dashed var(--line); border-radius: var(--r-surface); color: var(--muted); }
+.empty-state h2 { margin: 0; color: var(--ink); }
+.empty-state p { margin: 0 0 0.5rem; max-width: 46ch; }
+
+/* ---------- People ---------- */
+.people { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+.person { position: relative; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; background: none; border: 1px solid transparent; border-radius: var(--r-control); color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+.person:hover { color: var(--ink); }
+.person[aria-selected="true"] { color: var(--ink); }
+.person.add { border-style: dashed; border-color: var(--line); }
+.person:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.person-pill { position: absolute; inset: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-control); box-shadow: var(--shadow); }
+.person-name { position: relative; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person svg { position: relative; }
+
+/* ---------- Share ---------- */
+.share-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 1.25rem; }
+.share-note { flex-basis: 100%; margin: 0.25rem 0 0; color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- Milestones ---------- */
+.mile-grid { display: grid; gap: 1rem; }
+@media (min-width: 56rem) { .mile-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+.mile-feature { display: flex; flex-direction: column; gap: 0.25rem; padding: 1.5rem; border: 1px solid var(--line); border-radius: var(--r-surface); background: radial-gradient(120% 90% at 100% 0%, var(--accent-soft), transparent 60%), var(--surface); box-shadow: var(--shadow); }
+.mile-flag { color: var(--accent); margin-bottom: 0.5rem; }
+.mile-label { margin: 0; font-size: clamp(1.3rem, 2.6vw, 1.8rem); font-weight: 700; letter-spacing: -0.02em; }
+.mile-when { margin: 0 0 1rem; color: var(--muted); }
+.mile-count { margin: 0; display: flex; align-items: baseline; gap: 0.3rem; flex-wrap: wrap; font-family: var(--mono); font-weight: 700; font-size: clamp(1.4rem, 3vw, 2rem); font-variant-numeric: tabular-nums; }
+.mile-count small { color: var(--muted); font-size: 0.8rem; font-weight: 400; margin-right: 0.5rem; }
+.mile-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; align-content: start; }
+.mile-list li { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.9rem 1rem; border: 1px solid var(--line); border-radius: var(--r-surface); background: var(--surface); }
+.mile-name { font-weight: 600; }
+.mile-date { color: var(--muted); font-size: 0.92rem; }
+.mile-rel { color: var(--muted); font-size: 0.85rem; }
+.reached { margin-top: 1rem; }
+.reached summary { cursor: pointer; color: var(--muted); width: fit-content; border-radius: 6px; font-weight: 600; }
+.reached summary:hover { color: var(--ink); }
+.reached summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.reached ul { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.4rem 1.5rem; }
+.reached li { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; }
+.reached li svg { color: var(--accent); flex: none; }
+.reached li .mile-rel { margin-left: auto; }
+.alert-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-top: 1.25rem; }
+.alert-row p { margin: 0; max-width: 56ch; }
+
+/* ---------- Life in weeks ---------- */
+.weeks { display: grid; gap: 1.5rem; align-items: start; }
+.weeks-copy { order: -1; }
+@media (min-width: 56rem) {
+  .weeks { grid-template-columns: minmax(0, 34rem) minmax(0, 1fr); gap: 3rem; }
+  .weeks-copy { order: 0; position: sticky; top: 1.5rem; }
+}
+.weeks-grid canvas { display: block; }
+.weeks-stats { display: grid; margin-top: 1.25rem; }
+.weeks-stats div { display: flex; flex-direction: column-reverse; padding: 0.9rem 0; border-top: 1px solid var(--line); }
+.weeks-stats dd { font-family: var(--mono); font-weight: 700; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.weeks-stats dt { color: var(--muted); font-size: 0.9rem; }
+
+/* ---------- Facts bento ---------- */
+.bento { display: grid; gap: 0.75rem; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "heart heart planets" ". . planets"; }
+.b-heart { grid-area: heart; }
+.b-planets { grid-area: planets; }
+.bento-cell { display: flex; flex-direction: column; gap: 0.35rem; padding: 1.25rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-surface); min-width: 0; }
+.bento-cell > svg { color: var(--accent); margin-bottom: 0.4rem; }
+.b-heart { background: radial-gradient(120% 120% at 0% 100%, var(--accent-soft), transparent 65%), var(--surface); justify-content: flex-end; min-height: 12rem; }
+.b-planets { background: var(--surface-2); }
+.b-num { margin: 0; font-family: var(--mono); font-weight: 700; font-size: clamp(1.3rem, 2.6vw, 2rem); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.b-heart .b-num { font-size: clamp(1.6rem, 4vw, 3rem); }
+.b-label { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.b-planets ul { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.b-planets li { display: flex; justify-content: space-between; align-items: baseline; padding: 0.7rem 0; border-top: 1px solid var(--line); }
+.b-planets li b { font-family: var(--mono); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .bento { grid-template-columns: 1fr; grid-template-areas: none; }
+  .b-heart, .b-planets { grid-area: auto; }
+  .b-heart { min-height: 0; }
+  .mile-list { grid-template-columns: 1fr; }
+}
+
+/* ---------- Compare ---------- */
+.cmp-pickers { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: end; margin-bottom: 1.25rem; }
+.cmp-pickers > div { display: grid; gap: 0.5rem; }
+.cmp-arrow { color: var(--muted); margin-bottom: 0.9rem; }
+.cmp-gap { gap: 0.4rem; margin-bottom: 1.25rem; }
+.cmp-gap > svg { color: var(--accent); }
+.cmp-headline { margin: 0.25rem 0 0; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -0.02em; }
+.cmp-headline strong { color: var(--accent); }
+.cmp-grid { display: grid; gap: 1.25rem; }
+@media (min-width: 48rem) { .cmp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cmp-side { padding: 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-surface); box-shadow: var(--shadow); }
+.cmp-side h3 { margin: 0 0 0.75rem; font-size: 1.1rem; }
+.cmp-side h4 { margin: 1.25rem 0 0.5rem; font-size: 0.95rem; color: var(--muted); font-weight: 600; }
+.cmp-hours { margin: 0; font-family: var(--mono); font-weight: 700; font-size: clamp(1.6rem, 4vw, 2.6rem); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.cmp-sub { margin: 0.75rem 0 0; }
+.cmp-side ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.cmp-side li { display: flex; flex-direction: column; }
+@media (max-width: 640px) {
+  .cmp-pickers { grid-template-columns: 1fr; }
+  .cmp-arrow { display: none; }
+}
+
+/* ---------- Events ---------- */
+.event-form { max-width: 34rem; }
+.event-form .btn-primary { justify-self: start; }
+.event-form .error { min-height: 1.4em; }
+.event-list { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
+.event { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 1rem 1.5rem; padding: 1.1rem 1.25rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-surface); box-shadow: var(--shadow); }
+.event h3 { margin: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
+.event-dir { margin: 0; color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+.event-count { margin: 0; display: grid; justify-items: end; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.event-days { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; }
+.event-days small { margin-left: 0.4rem; font-size: 0.8rem; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.event-clock { color: var(--muted); }
+@media (max-width: 640px) {
+  .event { grid-template-columns: minmax(0, 1fr) auto; }
+  .event-count { grid-column: 1; grid-row: 2; justify-items: start; }
+  .event .icon-btn { grid-column: 2; grid-row: 1; }
+}
+
+.bento + .muted { margin-top: 0.9rem; }

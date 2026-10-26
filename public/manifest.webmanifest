@@ -1,0 +1,11 @@
+{
+  "name": "Elapsed",
+  "short_name": "Elapsed",
+  "description": "How long you've been alive, live.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
