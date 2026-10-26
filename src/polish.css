@@ -5,12 +5,11 @@
 :root {
   --accent-2: #3b82f6;
   --glow: rgb(10 122 90 / 0.22);
-  --grid-line: rgb(20 40 60 / 0.045);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --accent-2: #7aa7ff; --glow: rgb(95 227 181 / 0.2); --grid-line: rgb(255 255 255 / 0.035); }
+  :root:not([data-theme="light"]) { --accent-2: #7aa7ff; --glow: rgb(95 227 181 / 0.2); }
 }
-:root[data-theme="dark"] { --accent-2: #7aa7ff; --glow: rgb(95 227 181 / 0.2); --grid-line: rgb(255 255 255 / 0.035); }
+:root[data-theme="dark"] { --accent-2: #7aa7ff; --glow: rgb(95 227 181 / 0.2); }
 
 html { scroll-behavior: smooth; }
 ::selection { background: var(--accent); color: var(--on-accent); }
@@ -19,13 +18,6 @@ body { transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
 
 /* ---------- Ambient background ---------- */
 .ambient { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.ambient::before {
-  content: ""; position: absolute; inset: 0;
-  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
-  -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
-}
 .orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55; will-change: transform; }
 .orb-a { width: 34rem; height: 34rem; top: -12rem; right: -8rem; background: var(--glow); animation: drift-a 22s ease-in-out infinite alternate; }
 .orb-b { width: 28rem; height: 28rem; top: 40vh; left: -10rem; background: color-mix(in srgb, var(--accent-2) 22%, transparent); animation: drift-b 28s ease-in-out infinite alternate; }
@@ -168,4 +160,83 @@ footer { text-align: center; text-wrap: balance; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   .orb { opacity: 0.35; }
+}
+
+/* ---------- Custom select (month, year, hour, minute) ---------- */
+.sel { position: relative; min-width: 0; }
+.pop-head .sel-month { flex: 1.5; }
+.pop-head .sel-year { flex: 1; }
+.sel-trigger {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
+  font: inherit; font-size: 0.95rem; font-weight: 600; color: var(--ink); text-align: left;
+  min-height: 2.25rem; padding: 0.4rem 0.6rem; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: var(--r-control); cursor: pointer;
+  transition: border-color 0.2s var(--ease), box-shadow 0.25s var(--ease), background-color 0.2s var(--ease);
+}
+.sel-trigger:hover:not(:disabled) { border-color: var(--accent); }
+.sel-trigger:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sel-trigger[aria-expanded="true"] { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.sel-trigger:disabled { opacity: 0.45; cursor: not-allowed; }
+.sel-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sel-chev { flex: none; color: var(--muted); transition: transform 0.25s var(--ease), color 0.2s var(--ease); }
+.sel-trigger[aria-expanded="true"] .sel-chev { transform: rotate(180deg); color: var(--accent); }
+.sel-list {
+  position: absolute; z-index: 40; top: calc(100% + 0.35rem); left: 0; min-width: 100%; width: max-content; max-width: min(16rem, 80vw);
+  max-height: min(15rem, 45dvh); overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 0.3rem; list-style: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; outline: none; transform-origin: top;
+  box-shadow: 0 24px 50px -18px rgb(0 0 0 / 0.5), 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.sel-opt { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0.65rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-variant-numeric: tabular-nums; transition: background-color 0.12s var(--ease), color 0.12s var(--ease); }
+.sel-opt.active { background: var(--accent-soft); }
+.sel-opt.chosen { color: var(--accent); font-weight: 700; }
+.sel-opt[aria-disabled="true"] { opacity: 0.35; cursor: not-allowed; }
+.sel-opt svg { flex: none; }
+/* Time row: keep the dropdowns opening upward so they are never clipped by the sheet bottom */
+.time-row .sel { flex: 1; max-width: 5.5rem; }
+.time-row .sel-list { top: auto; bottom: calc(100% + 0.35rem); transform-origin: bottom; max-width: 8rem; }
+.time-row .sel-list { min-width: 5rem; }
+.pop-head { gap: 0.4rem; }
+
+/* Phones: calendar becomes a bottom sheet with large touch targets */
+@media (max-width: 640px) {
+  .picker-pop { position: fixed; left: 0.75rem; right: 0.75rem; top: auto; bottom: 0.75rem; width: auto; max-height: calc(100dvh - 1.5rem); overflow-y: auto; transform-origin: bottom center; z-index: 60; padding: 1rem 1rem 1.1rem; box-shadow: 0 -10px 60px rgb(0 0 0 / 0.5), 0 0 0 100vmax rgb(0 0 0 / 0.45); }
+  .picker-pop::before { content: ""; display: block; width: 2.5rem; height: 4px; border-radius: 4px; background: var(--line); margin: -0.35rem auto 0.8rem; }
+  .sel-trigger { min-height: 2.75rem; }
+  .nav-btn { width: 2.75rem; height: 2.75rem; }
+  .sel-opt { padding: 0.75rem 0.8rem; }
+  .sel-list { max-height: min(13rem, 40dvh); }
+  .time-row .sel { max-width: none; }
+  .seg button { padding: 0.7rem 0.9rem; }
+  .btn-ghost, .btn-primary { padding: 0.75rem 1.2rem; }
+}
+
+/* ---------- Overflow guards (no horizontal scroll on phones) ---------- */
+html, body { max-width: 100%; overflow-x: clip; }
+.wrap > *, .top > *, .lower > *, .mile-grid > *, .cmp-grid > *, .bento > * { min-width: 0; }
+.weeks { grid-template-columns: minmax(0, 1fr); }
+.weeks > * { min-width: 0; }
+.weeks-grid { width: 100%; max-width: 100%; overflow: hidden; }
+.weeks-grid canvas { max-width: 100%; }
+@media (min-width: 56rem) {
+  .weeks { grid-template-columns: minmax(0, 34rem) minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .wrap { padding-left: 1rem; padding-right: 1rem; }
+  .age .stat { padding: 0.9rem 0.8rem; }
+  .tabbar, .tabs { max-width: 100%; }
+  .tabs { overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+}
+
+/* ---------- 3D time orb (three.js) ---------- */
+.orb3d { position: absolute; z-index: 0; right: -2.5rem; top: 50%; width: min(27rem, 72%); aspect-ratio: 1; transform: translateY(-50%); pointer-events: none;
+  -webkit-mask-image: linear-gradient(to left, #000 45%, transparent 98%); mask-image: linear-gradient(to left, #000 45%, transparent 98%);
+  animation: orb-in 1.2s var(--ease) 0.2s backwards; }
+.orb3d canvas { display: block; width: 100%; height: 100%; }
+.orb3d.faint { opacity: 0.45; }
+@keyframes orb-in { from { opacity: 0; filter: blur(12px); } }
+.readout > :not(.orb3d) { position: relative; z-index: 2; }
+@media (max-width: 640px) {
+  .orb3d { right: -5rem; top: 0.5rem; width: 17rem; transform: none; opacity: 0.55; -webkit-mask-image: linear-gradient(to left, #000 30%, transparent 95%); mask-image: linear-gradient(to left, #000 30%, transparent 95%); }
+  .orb3d.faint { opacity: 0.3; }
 }

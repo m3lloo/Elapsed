@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Ic } from "./Icon";
+import { Select } from "./Select";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WEEK = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -184,30 +185,26 @@ export function DatePicker({ id, value, max, today: todayValue, invalid, describ
               <button type="button" className="nav-btn" aria-label="Previous month" disabled={atFirst} onClick={() => goMonth(-1)}>
                 <Ic icon={ChevronLeft} />
               </button>
-              <select
-                aria-label="Month"
+              <Select
+                label="Month"
+                className="sel-month"
                 value={view.m}
-                onChange={(e) => {
-                  const m = +e.target.value;
+                options={MONTHS.map((n, i) => ({ value: i, label: n, disabled: view.y === top.y && i > top.m }))}
+                onChange={(m) => {
                   setDir(m > view.m ? 1 : -1);
                   setView({ y: view.y, m });
                 }}
-              >
-                {MONTHS.map((n, i) => (
-                  <option key={n} value={i} disabled={view.y === top.y && i > top.m}>{n}</option>
-                ))}
-              </select>
-              <select
-                aria-label="Year"
+              />
+              <Select
+                label="Year"
+                className="sel-year"
                 value={view.y}
-                onChange={(e) => {
-                  const y = +e.target.value;
+                options={years.map((y) => ({ value: y, label: String(y) }))}
+                onChange={(y) => {
                   setDir(y > view.y ? 1 : -1);
                   setView({ y, m: y === top.y ? Math.min(view.m, top.m) : view.m });
                 }}
-              >
-                {years.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
+              />
               <button type="button" className="nav-btn" aria-label="Next month" disabled={isTopMonth} onClick={() => goMonth(1)}>
                 <Ic icon={ChevronRight} />
               </button>
@@ -258,13 +255,21 @@ export function DatePicker({ id, value, max, today: todayValue, invalid, describ
             </motion.div>
 
             <div className="time-row">
-              <select aria-label="Hour" disabled={!parts} value={h12} onChange={(e) => setTime(+e.target.value, parts?.mi ?? 0, pm)}>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => <option key={h} value={h}>{p2(h)}</option>)}
-              </select>
+              <Select
+                label="Hour"
+                disabled={!parts}
+                value={h12}
+                options={Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: p2(i + 1) }))}
+                onChange={(h) => setTime(h, parts?.mi ?? 0, pm)}
+              />
               <span aria-hidden="true">:</span>
-              <select aria-label="Minute" disabled={!parts} value={parts?.mi ?? 0} onChange={(e) => setTime(h12, +e.target.value, pm)}>
-                {Array.from({ length: 60 }, (_, i) => i).map((m) => <option key={m} value={m}>{p2(m)}</option>)}
-              </select>
+              <Select
+                label="Minute"
+                disabled={!parts}
+                value={parts?.mi ?? 0}
+                options={Array.from({ length: 60 }, (_, i) => ({ value: i, label: p2(i) }))}
+                onChange={(m) => setTime(h12, m, pm)}
+              />
               <div className="seg" role="group" aria-label="AM or PM">
                 {(["AM", "PM"] as const).map((x) => {
                   const on = (x === "PM") === pm;

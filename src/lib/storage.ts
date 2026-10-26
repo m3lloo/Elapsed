@@ -89,3 +89,38 @@ export function readShared(): Omit<Person, "id"> | null {
     return null;
   }
 }
+
+/* ---------- Backups ---------- */
+
+const WALL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+/** Validate untrusted backup JSON and rebuild a Store from only the fields we know. Null if unusable. */
+export function sanitizeStore(raw: unknown): Store | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  if (!Array.isArray(o.people)) return null;
+  const people: Person[] = [];
+  for (const p of o.people.slice(0, 50)) {
+    if (!p || typeof p !== "object") continue;
+    const r = p as Record<string, unknown>;
+    if (typeof r.name !== "string" || typeof r.birth !== "string" || (r.birth && !WALL.test(r.birth))) continue;
+    people.push({
+      id: typeof r.id === "string" && r.id ? r.id.slice(0, 20) : uid(),
+      name: r.name.slice(0, 40),
+      birth: r.birth,
+      ...(typeof r.tz === "string" && r.tz ? { tz: r.tz.slice(0, 64) } : {}),
+    });
+  }
+  if (!people.length) return null;
+  const events: EventItem[] = [];
+  if (Array.isArray(o.events)) {
+    for (const e of o.events.slice(0, 200)) {
+      if (!e || typeof e !== "object") continue;
+      const r = e as Record<string, unknown>;
+      if (typeof r.label !== "string" || typeof r.at !== "string" || !WALL.test(r.at)) continue;
+      events.push({ id: typeof r.id === "string" && r.id ? r.id.slice(0, 20) : uid(), label: r.label.slice(0, 60), at: r.at });
+    }
+  }
+  const activeId = people.some((p) => p.id === o.activeId) ? (o.activeId as string) : people[0].id;
+  return { people, events, activeId, alerts: o.alerts === true };
+}

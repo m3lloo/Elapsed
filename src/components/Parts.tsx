@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useSpring, type Variants } from "motion/react";
 import { animate, stagger } from "animejs";
 import { MS, calendarAge, instantToWall, nextBirthday, nextMilestone, wallToInstant } from "../lib/time";
+import { TimeOrb } from "./TimeOrb";
 import { fmtDate, fracOf, nf, pad, reducedMotion } from "../lib/format";
 
 /* Motion: entrance choreography. Headline number first, then sections, then their cells. */
@@ -121,23 +122,26 @@ export function Readout({ birth, now }: { birth: Date; now: Date }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 110, damping: 20 }}
     >
-      <p className="big">
-        <span hidden={settled}>
-          <span ref={wholeEl}>0</span>
-          <span ref={fracEl} className="frac">.0000</span>
-        </span>
-        <span hidden={!settled}>
-          {nf.format(whole)}
-          <span className="frac">.{fracOf(hours)}</span>
-        </span>
-      </p>
-      <p className="caption"><span className="live"><i aria-hidden="true" />Live</span>hours alive</p>
-      <div className="bar" aria-hidden="true">
-        <motion.i style={{ scaleX: fill }} />
+      <div className="hero-text">
+        <p className="big">
+          <span hidden={settled}>
+            <span ref={wholeEl}>0</span>
+            <span ref={fracEl} className="frac">.0000</span>
+          </span>
+          <span hidden={!settled}>
+            {nf.format(whole)}
+            <span className="frac">.{fracOf(hours)}</span>
+          </span>
+        </p>
+        <p className="caption"><span className="live"><i aria-hidden="true" />Live</span>hours alive</p>
+        <div className="bar" aria-hidden="true">
+          <motion.i style={{ scaleX: fill }} />
+        </div>
+        <p className="bar-note">
+          Hour {nf.format(mile.target)} arrives on {fmtDate(mile.at)} ({(mile.progress * 100).toFixed(1)}% there)
+        </p>
       </div>
-      <p className="bar-note">
-        Hour {nf.format(mile.target)} arrives on {fmtDate(mile.at)} ({(mile.progress * 100).toFixed(1)}% there)
-      </p>
+      <TimeOrb progress={mile.progress} />
     </motion.section>
   );
 }

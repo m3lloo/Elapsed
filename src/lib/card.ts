@@ -7,8 +7,8 @@ export async function makeCard(o: { name: string; hours: string; age: string }):
   try {
     await Promise.all([
       document.fonts.load('700 100px "Geist Mono"'),
-      document.fonts.load('700 40px "Geist"'),
-      document.fonts.load('400 32px "Geist"'),
+      document.fonts.load('700 40px "Bricolage Grotesque"'),
+      document.fonts.load('400 32px "Bricolage Grotesque"'),
     ]);
   } catch {
     /* fall back to system fonts */
@@ -31,11 +31,11 @@ export async function makeCard(o: { name: string; hours: string; age: string }):
   const pad = 72;
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = tok("--ink");
-  ctx.font = '700 40px "Geist", system-ui, sans-serif';
+  ctx.font = '700 40px "Bricolage Grotesque", system-ui, sans-serif';
   ctx.fillText("Elapsed", pad, pad + 32);
 
   ctx.fillStyle = tok("--muted");
-  ctx.font = '400 34px "Geist", system-ui, sans-serif';
+  ctx.font = '400 34px "Bricolage Grotesque", system-ui, sans-serif';
   ctx.fillText(o.name, pad, 230);
 
   let size = 170;
@@ -48,11 +48,11 @@ export async function makeCard(o: { name: string; hours: string; age: string }):
   ctx.fillText(o.hours, pad, 230 + size + 10);
 
   ctx.fillStyle = tok("--accent");
-  ctx.font = '700 44px "Geist", system-ui, sans-serif';
+  ctx.font = '700 44px "Bricolage Grotesque", system-ui, sans-serif';
   ctx.fillText("hours alive", pad, 230 + size + 80);
 
   ctx.fillStyle = tok("--muted");
-  ctx.font = '400 32px "Geist", system-ui, sans-serif';
+  ctx.font = '400 32px "Bricolage Grotesque", system-ui, sans-serif';
   ctx.fillText(o.age, pad, H - pad);
 
   return new Promise((resolve, reject) =>

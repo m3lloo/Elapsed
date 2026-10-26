@@ -2,12 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Elapsed" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="description" content="Elapsed shows how long you have been alive, live: hours, exact age, milestones and more. Private and installable." />
     <meta property="og:title" content="Elapsed: how long you’ve been alive, live" />
     <meta property="og:description" content="Hours alive ticking in real time, milestones, life in weeks and more. Runs entirely in your browser." />
@@ -15,9 +20,64 @@
     <title>Elapsed: how long you’ve been alive, live</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Geist+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <script>
+      /* Apply the saved theme before first paint, and skip the splash on reloads within a session. */
+      (function () {
+        try {
+          var t = localStorage.getItem("elapsed:theme");
+          if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+          if (sessionStorage.getItem("elapsed:splash")) document.documentElement.classList.add("no-splash");
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      #splash { --s-bg: #f3f4f6; --s-ink: #14161a; --s-muted: #566070; --s-track: #d9dde3; --s-accent: #0a7a5a; --s-accent2: #3b82f6;
+        position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 1.1rem; background: var(--s-bg); color: var(--s-ink);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.6s; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) #splash { --s-bg: #0d0f12; --s-ink: #eceef2; --s-muted: #9aa3b2; --s-track: #272c35; --s-accent: #5fe3b5; --s-accent2: #7aa7ff; }
+      }
+      :root[data-theme="dark"] #splash { --s-bg: #0d0f12; --s-ink: #eceef2; --s-muted: #9aa3b2; --s-track: #272c35; --s-accent: #5fe3b5; --s-accent2: #7aa7ff; }
+      #splash.out { opacity: 0; transform: scale(1.05); visibility: hidden; pointer-events: none; }
+      .no-splash #splash { display: none; }
+      #splash::before { content: ""; position: absolute; width: 38rem; height: 38rem; max-width: 120vw; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--s-accent) 22%, transparent), transparent); animation: s-breathe 3.2s ease-in-out infinite; }
+      .s-ring { position: relative; width: 7.5rem; height: 7.5rem; animation: s-spin 6s linear infinite; }
+      .s-ring svg { width: 100%; height: 100%; overflow: visible; }
+      .s-ring .track { fill: none; stroke: var(--s-track); stroke-width: 9; }
+      .s-ring .arc { fill: none; stroke: url(#s-grad); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 0 252; transform: rotate(-90deg); transform-origin: 50% 50%; animation: s-draw 1.5s 0.2s cubic-bezier(0.65, 0, 0.2, 1) forwards; filter: drop-shadow(0 0 6px var(--s-accent)); }
+      .s-dot { position: absolute; left: 50%; top: 50%; width: 0.9rem; height: 0.9rem; margin: -0.45rem; border-radius: 50%; background: var(--s-accent); animation: s-pulse 1.6s ease-out infinite; }
+      .s-word { position: relative; margin: 0.4rem 0 0; font: 700 clamp(2rem, 8vw, 3rem)/1 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -0.04em; display: flex; }
+      .s-word span { display: inline-block; opacity: 0; transform: translateY(0.6em); animation: s-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(0.35s + var(--i) * 55ms); }
+      .s-tag { position: relative; margin: 0; font: 400 0.95rem "Bricolage Grotesque", system-ui, sans-serif; color: var(--s-muted); opacity: 0; animation: s-rise 0.8s 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .s-bar { position: relative; width: 9rem; height: 3px; margin-top: 0.6rem; border-radius: 3px; background: var(--s-track); overflow: hidden; opacity: 0; animation: s-rise 0.6s 0.8s forwards; }
+      .s-bar i { position: absolute; inset: 0; width: 40%; border-radius: 3px; background: linear-gradient(90deg, var(--s-accent), var(--s-accent2)); animation: s-load 1.2s 0.9s ease-in-out infinite; }
+      @keyframes s-draw { to { stroke-dasharray: 170 252; } }
+      @keyframes s-spin { to { transform: rotate(360deg); } }
+      @keyframes s-rise { to { opacity: 1; transform: none; } }
+      @keyframes s-breathe { 50% { transform: scale(1.12); opacity: 0.7; } }
+      @keyframes s-load { from { transform: translateX(-110%); } to { transform: translateX(260%); } }
+      @keyframes s-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--s-accent) 60%, transparent); } 100% { box-shadow: 0 0 0 1.4rem transparent; } }
+      @media (prefers-reduced-motion: reduce) {
+        #splash *, #splash::before { animation-duration: 0.01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; }
+        .s-ring .arc { stroke-dasharray: 170 252; }
+      }
+    </style>
   </head>
   <body>
+    <div id="splash" role="status" aria-label="Loading Elapsed">
+      <div class="s-ring" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <defs><linearGradient id="s-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--s-accent)" /><stop offset="1" stop-color="var(--s-accent2)" /></linearGradient></defs>
+          <circle class="track" cx="50" cy="50" r="40" />
+          <circle class="arc" cx="50" cy="50" r="40" />
+        </svg>
+        <span class="s-dot"></span>
+      </div>
+      <div class="s-word" aria-hidden="true"><span style="--i:0">E</span><span style="--i:1">l</span><span style="--i:2">a</span><span style="--i:3">p</span><span style="--i:4">s</span><span style="--i:5">e</span><span style="--i:6">d</span></div>
+      <p class="s-tag">Your life, counted live</p>
+      <div class="s-bar" aria-hidden="true"><i></i></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

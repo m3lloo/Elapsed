@@ -16,7 +16,7 @@
   --r-surface: 16px;
   --r-control: 10px;
   --mono: "Geist Mono", ui-monospace, Consolas, monospace;
-  --sans: "Geist", system-ui, sans-serif;
+  --sans: "Bricolage Grotesque", system-ui, sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 /* Theme: follows the system unless the toggle sets data-theme on <html>. */

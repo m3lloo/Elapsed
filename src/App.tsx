@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useScroll, useSpring } from "motion/react";
-import { Bell, BellOff, CalendarClock, Download, Globe, Hourglass, Trash2, UserPlus, Users, X, type LucideIcon } from "lucide-react";
+import { Bell, BellOff, CalendarClock, Cake, Download, Globe, Hourglass, Share, Trash2, UserPlus, Users, X, type LucideIcon } from "lucide-react";
 import { deviceTz, instantToWall, milestones, parseWall, timeZones } from "./lib/time";
 import { fmtDate, wallStr } from "./lib/format";
 import { alertsSupported, enableAlerts, notify } from "./lib/alerts";
@@ -10,12 +10,17 @@ import {
 } from "./lib/storage";
 import { DatePicker } from "./components/DatePicker";
 import { Ic } from "./components/Icon";
+import { TimeOrb } from "./components/TimeOrb";
 import { Breakdown, GhostNumber, Readout } from "./components/Parts";
 import { PersonBar } from "./components/PersonBar";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { Milestones } from "./components/Milestones";
 import { WeeksGrid } from "./components/WeeksGrid";
 import { Facts } from "./components/Facts";
+import { Identity } from "./components/Identity";
+import { TimeSpent } from "./components/TimeSpent";
+import { DataTools } from "./components/DataTools";
+import { confetti } from "./lib/confetti";
 import { ShareBar } from "./components/ShareBar";
 import { Compare } from "./components/Compare";
 import { Events } from "./components/Events";
@@ -38,6 +43,13 @@ function useNow(intervalMs: number): Date {
 
 interface InstallEvent extends Event { prompt: () => Promise<void> }
 
+/** iOS Safari has no install prompt, so offer written steps instead (and nothing once installed). */
+const isIosBrowser = () => {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = (navigator as Navigator & { standalone?: boolean }).standalone === true || matchMedia("(display-mode: standalone)").matches;
+  return ios && !standalone;
+};
+
 export default function App() {
   const [store, setStore] = useState(loadStore);
   const [theme, setTheme] = useState<Theme>(loadTheme);
@@ -46,6 +58,8 @@ export default function App() {
   const [install, setInstall] = useState<InstallEvent | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [iosTip, setIosTip] = useState(false);
+  const ios = useMemo(isIosBrowser, []);
   const now = useNow(100);
   const zones = useMemo(timeZones, []);
   const seen = useRef(loadSeen());
@@ -97,6 +111,39 @@ export default function App() {
     else if (parsed.wall.getFullYear() < 1900) error = "Pick a year from 1900 onward.";
   }
   const birth = parsed && !error ? parsed.instant : null;
+
+  // Birthday: once per person per day, throw confetti and show a banner.
+  const wallBirth = birth ? instantToWall(birth, tz) : null;
+  const isBirthday = !!wallBirth && wallBirth.getMonth() === wallNow.getMonth() && wallBirth.getDate() === wallNow.getDate() && wallBirth.getFullYear() < wallNow.getFullYear();
+  const [partyOff, setPartyOff] = useState(false);
+  useEffect(() => {
+    if (!isBirthday) return;
+    const key = `${person.id}:${wallStr(wallNow).slice(0, 10)}`;
+    try {
+      if (localStorage.getItem("elapsed:party") === key) return;
+      localStorage.setItem("elapsed:party", key);
+    } catch {
+      /* storage unavailable: celebrate this session only */
+    }
+    const id = window.setTimeout(() => confetti(), 900);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBirthday, person.id]);
+
+  // Keyboard shortcuts: 1-3 switch sections, T cycles the theme.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName))) return;
+      if (el?.closest("[role=dialog], [role=listbox]")) return;
+      const tab = TABS[Number(e.key) - 1];
+      if (tab) setView(tab.id);
+      else if (e.key.toLowerCase() === "t") setTheme((t) => (t === "system" ? "light" : t === "light" ? "dark" : "system"));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const patchPerson = (patch: Partial<Person>) =>
     setStore((s) => ({ ...s, people: s.people.map((p) => (p.id === s.activeId ? { ...p, ...patch } : p)) }));
@@ -198,10 +245,16 @@ export default function App() {
             </div>
           </div>
           <div className="header-actions">
-            {install && (
-              <button type="button" className="btn-chip" onClick={() => void install.prompt().then(() => setInstall(null))}>
-                <Ic icon={Download} size={16} /> Install
+            {install ? (
+              <button type="button" className="btn-chip" aria-label="Install app" onClick={() => void install.prompt().then(() => setInstall(null))}>
+                <Ic icon={Download} size={16} /> <span className="chip-label">Install</span>
               </button>
+            ) : (
+              ios && (
+                <button type="button" className="btn-chip" aria-label="How to install on iPhone" aria-expanded={iosTip} onClick={() => setIosTip((v) => !v)}>
+                  <Ic icon={Download} size={16} /> <span className="chip-label">Install</span>
+                </button>
+              )
             )}
             <ThemeToggle theme={theme} onChange={setTheme} />
           </div>
@@ -231,6 +284,28 @@ export default function App() {
         </div>
 
         <AnimatePresence>
+          {isBirthday && !partyOff && (
+            <motion.div className="banner party" role="status" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+              <Ic icon={Cake} size={20} className="party-ic" />
+              <p>
+                <strong>Happy birthday{person.name.trim() ? `, ${person.name.trim()}` : ""}!</strong> You’re {wallNow.getFullYear() - (wallBirth as Date).getFullYear()} today.
+              </p>
+              <button type="button" className="btn-chip" onClick={() => confetti(180)}>Celebrate</button>
+              <button type="button" className="icon-btn" aria-label="Dismiss birthday message" onClick={() => setPartyOff(true)}>
+                <Ic icon={X} />
+              </button>
+            </motion.div>
+          )}
+          {ios && iosTip && (
+            <motion.div className="banner" role="status" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+              <p>
+                To install Elapsed, tap <Ic icon={Share} size={16} className="inline-ic" /> <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.
+              </p>
+              <button type="button" className="icon-btn" aria-label="Close install tip" onClick={() => setIosTip(false)}>
+                <Ic icon={X} />
+              </button>
+            </motion.div>
+          )}
           {incoming && (
             <motion.div
               className="banner"
@@ -335,8 +410,11 @@ export default function App() {
                     <Readout key={person.id} birth={birth} now={now} />
                   ) : (
                     <section className="readout empty" aria-label="Hours alive, waiting for a birth date">
-                      <GhostNumber />
-                      <p className="caption">hours alive</p>
+                      <div className="hero-text">
+                        <GhostNumber />
+                        <p className="caption">hours alive</p>
+                      </div>
+                      <TimeOrb progress={0.3} faint />
                     </section>
                   )}
                 </div>
@@ -345,8 +423,10 @@ export default function App() {
                   <div key={person.id}>
                     <ShareBar person={person} birth={birth} tz={tz} now={now} />
                     <Breakdown birth={birth} tz={tz} now={now} />
-                    <Milestones birth={birth} now={now} footer={alertToggle} />
+                    <Milestones birth={birth} now={now} name={person.name} footer={alertToggle} />
                     <WeeksGrid birth={birth} now={now} theme={theme} />
+                    <Identity wall={wallBirth as Date} birth={birth} now={now} />
+                    <TimeSpent ms={now.getTime() - birth.getTime()} />
                     <Facts ms={now.getTime() - birth.getTime()} />
                   </div>
                 )}
@@ -358,7 +438,11 @@ export default function App() {
           </motion.div>
         </main>
 
-        <footer>Calculated in your device’s time zone ({deviceTz()}) unless you pick a birth time zone. Nothing leaves your browser unless you copy a share link.</footer>
+        <footer>
+          <DataTools store={store} onReplace={setStore} />
+          <p>Calculated in your device’s time zone ({deviceTz()}) unless you pick a birth time zone. Nothing leaves your browser unless you copy a share link.</p>
+          <p className="keys">Shortcuts: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> switch sections · <kbd>T</kbd> changes theme</p>
+        </footer>
       </div>
     </MotionConfig>
   );
